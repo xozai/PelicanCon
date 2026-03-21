@@ -76,29 +76,38 @@ struct ScheduleView: View {
 
     private var reuniteBanner: some View {
         HStack(spacing: 14) {
-            Text("🎓")
-                .font(.system(size: 36))
+            // Pelican brand mark
+            ZStack {
+                Image(systemName: "bird.fill")
+                    .font(.system(size: 30))
+                    .foregroundColor(.white)
+                Circle()
+                    .fill(Theme.yellow)
+                    .frame(width: 9, height: 9)
+                    .offset(x: 11, y: 5)
+            }
+
             VStack(alignment: .leading, spacing: 2) {
-                Text("Class of 1991")
+                Text("St. Paul's School")
                     .font(.system(size: 16, weight: .bold))
                     .foregroundColor(.white)
-                Text("35th Reunion Weekend")
+                Text("Class of '91 · 35th Reunion Weekend")
                     .font(.caption)
-                    .foregroundColor(Theme.gold.opacity(0.9))
+                    .foregroundColor(Theme.yellow)
             }
             Spacer()
             VStack(alignment: .trailing, spacing: 2) {
                 Text("\(eventVM.events.count)")
                     .font(.title2)
                     .fontWeight(.bold)
-                    .foregroundColor(Theme.gold)
+                    .foregroundColor(Theme.yellow)
                 Text("events")
                     .font(.caption2)
                     .foregroundColor(.white.opacity(0.8))
             }
         }
         .padding(18)
-        .background(Theme.navyGradient)
+        .background(Theme.redGradient)
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .padding(.horizontal, 16)
     }

@@ -57,10 +57,17 @@ struct ChatListView: View {
         HStack(spacing: 14) {
             ZStack {
                 Circle()
-                    .fill(Theme.navyGradient)
+                    .fill(Theme.redGradient)
                     .frame(width: 50, height: 50)
-                Text("🎓")
-                    .font(.title3)
+                ZStack {
+                    Image(systemName: "bird.fill")
+                        .font(.system(size: 22))
+                        .foregroundColor(.white)
+                    Circle()
+                        .fill(Theme.yellow)
+                        .frame(width: 7, height: 7)
+                        .offset(x: 8, y: 4)
+                }
             }
 
             VStack(alignment: .leading, spacing: 3) {

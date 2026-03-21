@@ -19,17 +19,29 @@ struct RegisterView: View {
                 VStack(spacing: 24) {
                     // Header
                     VStack(spacing: 8) {
-                        Image(systemName: "person.badge.plus")
-                            .font(.system(size: 44))
-                            .foregroundColor(Theme.gold)
+                        // Pelican brand mark — St. Paul's red + yellow beak
+                    ZStack {
+                        Circle()
+                            .fill(Theme.redGradient)
+                            .frame(width: 72, height: 72)
+                        ZStack {
+                            Image(systemName: "bird.fill")
+                                .font(.system(size: 34))
+                                .foregroundColor(.white)
+                            Circle()
+                                .fill(Theme.yellow)
+                                .frame(width: 10, height: 10)
+                                .offset(x: 13, y: 6)
+                        }
+                    }
 
-                        Text("Join PelicanCon")
-                            .font(.system(size: 28, weight: .bold, design: .serif))
-                            .foregroundColor(Theme.navy)
+                    Text("Join PelicanCon")
+                        .font(.system(size: 28, weight: .bold, design: .serif))
+                        .foregroundColor(Theme.red)
 
-                        Text("Create your Class of '91 profile")
-                            .font(.subheadline)
-                            .foregroundColor(Theme.midGray)
+                    Text("St. Paul's School · Class of '91")
+                        .font(.subheadline)
+                        .foregroundColor(Theme.midGray)
                     }
                     .padding(.top, 16)
 

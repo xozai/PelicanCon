@@ -15,23 +15,36 @@ struct LoginView: View {
 
                 ScrollView {
                     VStack(spacing: 0) {
-                        // Hero header
+                        // Hero header — St. Paul's red brand gradient
                         ZStack {
-                            Theme.navyGradient
+                            Theme.redGradient
                             VStack(spacing: 12) {
-                                Image(systemName: "bird.fill")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 60, height: 60)
-                                    .foregroundColor(Theme.gold)
+                                // Pelican with official yellow beak accent
+                                ZStack {
+                                    Image(systemName: "bird.fill")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 60, height: 60)
+                                        .foregroundColor(.white)
+                                    Circle()
+                                        .fill(Theme.yellow)
+                                        .frame(width: 14, height: 14)
+                                        .offset(x: 21, y: 8)
+                                }
 
                                 Text("PelicanCon")
                                     .font(.system(size: 34, weight: .bold, design: .serif))
                                     .foregroundColor(.white)
 
-                                Text("Class of '91 · 35th Reunion")
+                                Text("St. Paul's School · Class of '91")
                                     .font(.subheadline)
-                                    .foregroundColor(Theme.gold.opacity(0.9))
+                                    .foregroundColor(Theme.yellow)
+
+                                Text("Go Big Red")
+                                    .font(.system(size: 11, weight: .semibold))
+                                    .foregroundColor(.white.opacity(0.65))
+                                    .tracking(2)
+                                    .textCase(.uppercase)
                             }
                             .padding(.vertical, 48)
                         }

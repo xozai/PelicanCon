@@ -31,9 +31,9 @@ struct AttendeeProfileView: View {
                                 .foregroundColor(Theme.navy)
                                 .multilineTextAlignment(.center)
 
-                            Text("Class of \(user.graduationYear)")
+                            Text("St. Paul's · Class of \(user.graduationYear)")
                                 .font(.subheadline)
-                                .foregroundColor(Theme.gold)
+                                .foregroundColor(Theme.red)
                                 .fontWeight(.semibold)
 
                             if let city = user.currentCity {

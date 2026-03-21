@@ -53,9 +53,9 @@ struct ProfileView: View {
                                     .font(.system(size: 24, weight: .bold, design: .serif))
                                     .foregroundColor(Theme.navy)
 
-                                Text("Class of \(user.graduationYear)")
+                                Text("St. Paul's · Class of \(user.graduationYear)")
                                     .font(.subheadline)
-                                    .foregroundColor(Theme.gold)
+                                    .foregroundColor(Theme.red)
                                     .fontWeight(.semibold)
 
                                 if let city = user.currentCity {
@@ -91,7 +91,7 @@ struct ProfileView: View {
                                     Divider().frame(height: 40)
                                     statTile(value: "35th", label: "Reunion")
                                     Divider().frame(height: 40)
-                                    statTile(value: "🎓", label: "Pelican")
+                                    statTile(value: "Big Red", label: "Go!")
                                 }
                                 .background(Color.white)
                                 .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -145,7 +145,7 @@ struct ProfileView: View {
 
     private func statTile(value: String, label: String) -> some View {
         VStack(spacing: 4) {
-            Text(value).font(.title3).fontWeight(.bold).foregroundColor(Theme.navy)
+            Text(value).font(.title3).fontWeight(.bold).foregroundColor(Theme.red)
             Text(label).font(.caption2).foregroundColor(Theme.midGray)
         }
         .frame(maxWidth: .infinity)
@@ -182,7 +182,7 @@ struct EditProfileView: View {
                     Section("Social Links") {
                         HStack {
                             Image(systemName: "person.crop.square.filled.and.at.rectangle")
-                                .foregroundColor(.blue)
+                                .foregroundColor(Theme.red)
                             TextField("LinkedIn URL", text: $linkedin)
                                 .autocorrectionDisabled()
                                 .autocapitalization(.none)

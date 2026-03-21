@@ -53,7 +53,7 @@ struct MainTabView: View {
                 .tag(4)
                 .environmentObject(profileVM)
         }
-        .tint(Theme.navy)
+        .tint(Theme.red)
         .onAppear {
             setupViewModels()
             startAllListeners()

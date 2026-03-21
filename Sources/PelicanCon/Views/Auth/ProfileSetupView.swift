@@ -20,14 +20,29 @@ struct ProfileSetupView: View {
                 VStack(spacing: 28) {
                     // Hero
                     VStack(spacing: 10) {
-                        Text("🎉")
-                            .font(.system(size: 52))
-                        Text("Welcome to PelicanCon!")
-                            .font(.system(size: 26, weight: .bold, design: .serif))
-                            .foregroundColor(Theme.navy)
-                        Text("Tell your classmates about yourself")
-                            .font(.subheadline)
-                            .foregroundColor(Theme.midGray)
+                        // St. Paul's branded welcome header
+                    ZStack {
+                        Circle()
+                            .fill(Theme.redGradient)
+                            .frame(width: 80, height: 80)
+                        ZStack {
+                            Image(systemName: "bird.fill")
+                                .font(.system(size: 38))
+                                .foregroundColor(.white)
+                            Circle()
+                                .fill(Theme.yellow)
+                                .frame(width: 12, height: 12)
+                                .offset(x: 15, y: 7)
+                        }
+                    }
+
+                    Text("Welcome, Big Red!")
+                        .font(.system(size: 26, weight: .bold, design: .serif))
+                        .foregroundColor(Theme.red)
+
+                    Text("Tell your classmates about yourself")
+                        .font(.subheadline)
+                        .foregroundColor(Theme.midGray)
                     }
                     .padding(.top, 24)
 
