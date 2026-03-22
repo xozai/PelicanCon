@@ -57,6 +57,20 @@ struct AdminDashboardView: View {
                             )
 
                             adminNavCard(
+                                icon:     "flag.fill",
+                                iconColor: adminVM.flaggedPhotos.isEmpty ? Theme.navy : .orange,
+                                title:    "Content Moderation",
+                                subtitle: adminVM.flaggedPhotos.isEmpty
+                                    ? "No reports pending"
+                                    : "\(adminVM.flaggedPhotos.count) photo\(adminVM.flaggedPhotos.count == 1 ? "" : "s") flagged for review",
+                                destination: AnyView(
+                                    ModerationView()
+                                        .environmentObject(adminVM)
+                                        .environmentObject(authVM)
+                                )
+                            )
+
+                            adminNavCard(
                                 icon:     "lock.shield.fill",
                                 iconColor: Theme.navy,
                                 title:    "Invite List",
@@ -91,6 +105,7 @@ struct AdminDashboardView: View {
             .onAppear {
                 if let uid = authVM.currentUser?.id {
                     adminVM.load(currentUserId: uid)
+                    adminVM.startFlaggedStream(adminUid: uid)
                 }
             }
         }

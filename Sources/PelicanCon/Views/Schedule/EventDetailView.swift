@@ -6,6 +6,7 @@ struct EventDetailView: View {
     @EnvironmentObject var eventVM: EventViewModel
     @Environment(\.dismiss) var dismiss
     @State private var mapRegion: MKCoordinateRegion
+    @State private var showVenueGuide = false
 
     init(event: ReunionEvent) {
         self.event = event
@@ -94,6 +95,8 @@ struct EventDetailView: View {
                             }
                             .frame(height: 200)
                             .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .accessibilityLabel("Map showing \(event.locationName)")
+                            .accessibilityHint("Interactive map. Double-tap to open in Maps app.")
 
                             Button {
                                 openInMaps()
@@ -103,7 +106,17 @@ struct EventDetailView: View {
                                     .fontWeight(.semibold)
                                     .foregroundColor(Theme.softBlue)
                             }
+                            .frame(minHeight: 44)
+                            .accessibilityLabel("Get directions to \(event.locationName)")
                         }
+
+                        // Venue Guide button
+                        Button {
+                            showVenueGuide = true
+                        } label: {
+                            Label("Venue Guide", systemImage: "map.fill")
+                        }
+                        .buttonStyle(SecondaryButtonStyle())
 
                         // Add to Calendar button
                         Button {
@@ -126,6 +139,9 @@ struct EventDetailView: View {
                         .foregroundColor(Theme.navy)
                 }
             }
+            .sheet(isPresented: $showVenueGuide) {
+                VenueGuideView(event: event)
+            }
         }
     }
 
@@ -142,6 +158,7 @@ struct EventDetailView: View {
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 9)
+            .frame(minHeight: 44)
             .background(
                 RoundedRectangle(cornerRadius: 22)
                     .fill(isSelected ? Theme.navy : Theme.lightGray)
@@ -150,6 +167,9 @@ struct EventDetailView: View {
         }
         .buttonStyle(.plain)
         .animation(.easeInOut(duration: 0.15), value: isSelected)
+        .accessibilityLabel(status.label)
+        .accessibilityValue(isSelected ? "selected" : "not selected")
+        .accessibilityHint("Double-tap to RSVP \(status.label.lowercased())")
     }
 
     private func infoRow<Content: View>(icon: String, color: Color, @ViewBuilder content: () -> Content) -> some View {

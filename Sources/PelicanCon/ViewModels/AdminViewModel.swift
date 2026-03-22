@@ -1,4 +1,5 @@
 import Foundation
+import FirebaseFirestore
 
 @MainActor
 final class AdminViewModel: ObservableObject {
@@ -11,6 +12,11 @@ final class AdminViewModel: ObservableObject {
     }
     @Published var isRemovingUser              = false
     @Published var userRemoveSuccess: String?
+
+    // MARK: - Moderation state
+    @Published var flaggedPhotos: [SharedPhoto]   = []
+    @Published var isLoadingFlagged               = false
+    private var flaggedTask: Task<Void, Never>?
 
     // MARK: - iCal sync state
     @Published var icalURLInput                = ""
@@ -29,7 +35,10 @@ final class AdminViewModel: ObservableObject {
     private let userService    = UserService.shared
     private var usersStreamTask: Task<Void, Never>?
 
-    deinit { usersStreamTask?.cancel() }
+    deinit {
+        usersStreamTask?.cancel()
+        flaggedTask?.cancel()
+    }
 
     // MARK: - Setup
 
@@ -138,6 +147,43 @@ final class AdminViewModel: ObservableObject {
         icalConfig = await adminService.fetchICalConfig()
         if let saved = icalConfig?.url {
             icalURLInput = saved
+        }
+    }
+
+    // MARK: - Moderation
+
+    func startFlaggedStream(adminUid: String) {
+        guard flaggedTask == nil else { return }
+        isLoadingFlagged = true
+        flaggedTask = Task {
+            for await photos in PhotoService.shared.flaggedPhotosStream() {
+                self.flaggedPhotos   = photos
+                self.isLoadingFlagged = false
+            }
+        }
+    }
+
+    /// Remove flag reports but keep the photo
+    func dismissFlag(_ photo: SharedPhoto) async {
+        guard let photoId = photo.id else { return }
+        do {
+            // Clear all flags by overwriting the array to empty
+            try await Firestore.firestore()
+                .collection("photos")
+                .document(photoId)
+                .updateData(["flaggedBy": []])
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    /// Delete the photo and its Storage files
+    func deleteAndDismissPhoto(_ photo: SharedPhoto, adminUid: String) async {
+        guard let photoId = photo.id else { return }
+        do {
+            try await PhotoService.shared.deletePhoto(photoId: photoId, uploaderId: photo.uploaderId)
+        } catch {
+            errorMessage = error.localizedDescription
         }
     }
 

@@ -21,7 +21,9 @@ final class PhotoService {
         uploaderPhotoURL: String?,
         image: UIImage,
         caption: String?,
-        isMemoryLane: Bool
+        isMemoryLane: Bool,
+        thenImage: UIImage? = nil,
+        taggedUserIds: [String] = []
     ) async throws -> SharedPhoto {
         // Enforce per-user photo limit
         let existing = try await photosRef
@@ -33,12 +35,12 @@ final class PhotoService {
         }
 
         let photoId = UUID().uuidString
+        let meta    = StorageMetadata(); meta.contentType = "image/jpeg"
 
         // Downscale to max 1920px on longest side, then compress
         let scaled   = image.scaledToMaxDimension(PhotoService.maxDimensionPx) ?? image
         let fullData = scaled.jpegData(compressionQuality: 0.75) ?? Data()
         let fullRef  = storage.reference().child("photos/\(photoId)/full.jpg")
-        let meta     = StorageMetadata(); meta.contentType = "image/jpeg"
         _ = try await fullRef.putDataAsync(fullData, metadata: meta)
         let fullURL = try await fullRef.downloadURL()
 
@@ -49,6 +51,16 @@ final class PhotoService {
         let thumbRef   = storage.reference().child("photos/\(photoId)/thumb.jpg")
         _ = try await thumbRef.putDataAsync(thumbData, metadata: meta)
         let thumbURL = try await thumbRef.downloadURL()
+
+        // Optional "then" (1991) photo for Memory Lane Then vs. Now
+        var thenURL: String? = nil
+        if let thenImg = thenImage {
+            let thenScaled = thenImg.scaledToMaxDimension(PhotoService.maxDimensionPx) ?? thenImg
+            let thenData   = thenScaled.jpegData(compressionQuality: 0.75) ?? Data()
+            let thenRef    = storage.reference().child("photos/\(photoId)/then.jpg")
+            _ = try await thenRef.putDataAsync(thenData, metadata: meta)
+            thenURL = try await thenRef.downloadURL().absoluteString
+        }
 
         let photo = SharedPhoto(
             id:               photoId,
@@ -61,7 +73,10 @@ final class PhotoService {
             likes:            [],
             comments:         [],
             uploadedAt:       Date(),
-            isMemoryLane:     isMemoryLane
+            isMemoryLane:     isMemoryLane,
+            thenPhotoURL:     thenURL,
+            taggedUserIds:    taggedUserIds,
+            flaggedBy:        []
         )
 
         try photosRef.document(photoId).setData(from: photo)
@@ -138,13 +153,40 @@ final class PhotoService {
     // MARK: - Delete
 
     func deletePhoto(photoId: String, uploaderId: String) async throws {
-        // Delete Firestore record
         try await photosRef.document(photoId).delete()
-        // Delete from Storage
-        let fullRef  = storage.reference().child("photos/\(photoId)/full.jpg")
-        let thumbRef = storage.reference().child("photos/\(photoId)/thumb.jpg")
-        try? await fullRef.delete()
-        try? await thumbRef.delete()
+        let base = storage.reference().child("photos/\(photoId)")
+        try? await base.child("full.jpg").delete()
+        try? await base.child("thumb.jpg").delete()
+        try? await base.child("then.jpg").delete()
+    }
+
+    // MARK: - Flagging (content moderation)
+
+    func flagPhoto(photoId: String, userId: String) async throws {
+        try await photosRef.document(photoId).updateData([
+            "flaggedBy": FieldValue.arrayUnion([userId])
+        ])
+    }
+
+    func unflagPhoto(photoId: String, userId: String) async throws {
+        try await photosRef.document(photoId).updateData([
+            "flaggedBy": FieldValue.arrayRemove([userId])
+        ])
+    }
+
+    func flaggedPhotosStream() -> AsyncStream<[SharedPhoto]> {
+        AsyncStream { continuation in
+            let listener = photosRef
+                .whereField("flaggedBy", isNotEqualTo: [] as [String])
+                .order(by: "flaggedBy", descending: false)
+                .order(by: "uploadedAt", descending: true)
+                .addSnapshotListener { snapshot, _ in
+                    let photos = snapshot?.documents
+                        .compactMap { try? $0.data(as: SharedPhoto.self) } ?? []
+                    continuation.yield(photos)
+                }
+            continuation.onTermination = { _ in listener.remove() }
+        }
     }
 }
 

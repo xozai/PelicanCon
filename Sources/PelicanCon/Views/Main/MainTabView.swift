@@ -34,6 +34,7 @@ struct MainTabView: View {
                     .tabItem { Label("Photos", systemImage: "photo.stack.fill") }
                     .tag(2)
                     .environmentObject(galleryVM)
+                    .environmentObject(directoryVM)
 
                 DirectoryView()
                     .tabItem { Label("Directory", systemImage: "person.2.fill") }

@@ -86,12 +86,14 @@ struct PrimaryButtonStyle: ButtonStyle {
             .font(.system(size: 16, weight: .semibold))
             .foregroundColor(.white)
             .frame(maxWidth: .infinity)
+            .frame(minHeight: 44)
             .padding(.vertical, 14)
             .background(
                 RoundedRectangle(cornerRadius: 12)
                     .fill(Theme.redGradient)
                     .opacity(configuration.isPressed ? 0.85 : 1.0)
             )
+            .contentShape(RoundedRectangle(cornerRadius: 12))
             .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
             .animation(.easeInOut(duration: 0.15), value: configuration.isPressed)
     }
@@ -103,6 +105,7 @@ struct SecondaryButtonStyle: ButtonStyle {
             .font(.system(size: 16, weight: .semibold))
             .foregroundColor(Theme.red)
             .frame(maxWidth: .infinity)
+            .frame(minHeight: 44)
             .padding(.vertical, 14)
             .background(
                 RoundedRectangle(cornerRadius: 12)
@@ -112,6 +115,7 @@ struct SecondaryButtonStyle: ButtonStyle {
                             .fill(Color.white.opacity(configuration.isPressed ? 0.92 : 1.0))
                     )
             )
+            .contentShape(RoundedRectangle(cornerRadius: 12))
             .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
             .animation(.easeInOut(duration: 0.15), value: configuration.isPressed)
     }

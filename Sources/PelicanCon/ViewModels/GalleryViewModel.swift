@@ -43,7 +43,13 @@ final class GalleryViewModel: ObservableObject {
 
     // MARK: - Upload
 
-    func uploadPhoto(image: UIImage, caption: String?, isMemoryLane: Bool) async {
+    func uploadPhoto(
+        image: UIImage,
+        caption: String?,
+        isMemoryLane: Bool,
+        thenImage: UIImage? = nil,
+        taggedUserIds: [String] = []
+    ) async {
         guard let uid  = currentUserId,
               let name = currentUserName else { return }
         isUploading  = true
@@ -55,7 +61,9 @@ final class GalleryViewModel: ObservableObject {
                 uploaderPhotoURL: currentUserPhoto,
                 image:            image,
                 caption:          caption.flatMap { $0.isEmpty ? nil : $0 },
-                isMemoryLane:     isMemoryLane
+                isMemoryLane:     isMemoryLane,
+                thenImage:        thenImage,
+                taggedUserIds:    taggedUserIds
             )
         } catch {
             errorMessage = error.localizedDescription
@@ -119,6 +127,19 @@ final class GalleryViewModel: ObservableObject {
             return
         }
         UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
+    }
+
+    // MARK: - Flagging
+
+    func flagPhoto(_ photo: SharedPhoto) async {
+        guard let photoId = photo.id,
+              let uid     = currentUserId else { return }
+        try? await photoService.flagPhoto(photoId: photoId, userId: uid)
+    }
+
+    func isFlagged(photo: SharedPhoto) -> Bool {
+        guard let uid = currentUserId else { return false }
+        return photo.isFlaggedBy(uid)
     }
 
     func clearError() { errorMessage = nil }

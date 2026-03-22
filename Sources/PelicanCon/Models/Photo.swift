@@ -13,17 +13,27 @@ struct SharedPhoto: Identifiable, Codable, Equatable {
     var comments: [PhotoComment]
     var uploadedAt: Date
     var isMemoryLane: Bool           // true = throwback 1991 photo
+    // Memory Lane: Then vs. Now
+    var thenPhotoURL: String?        // optional "then" (1991) image URL for side-by-side
+    var taggedUserIds: [String]      // classmates tagged in this photo
+    // Moderation
+    var flaggedBy: [String]          // userIDs who have flagged this photo
 
     var likeCount: Int { likes.count }
+    var flagCount: Int { flaggedBy.count }
 
     func isLikedBy(_ userId: String) -> Bool {
         likes.contains(userId)
     }
 
+    func isFlaggedBy(_ userId: String) -> Bool {
+        flaggedBy.contains(userId)
+    }
+
     enum CodingKeys: String, CodingKey {
         case id, uploaderId, uploaderName, uploaderPhotoURL
         case imageURL, thumbnailURL, caption, likes, comments
-        case uploadedAt, isMemoryLane
+        case uploadedAt, isMemoryLane, thenPhotoURL, taggedUserIds, flaggedBy
     }
 }
 
@@ -57,7 +67,10 @@ extension SharedPhoto {
                     )
                 ] : [],
                 uploadedAt: Date().addingTimeInterval(Double(-i * 3600)),
-                isMemoryLane: i > 4
+                isMemoryLane: i > 4,
+                thenPhotoURL: nil,
+                taggedUserIds: [],
+                flaggedBy: []
             )
         }
     }

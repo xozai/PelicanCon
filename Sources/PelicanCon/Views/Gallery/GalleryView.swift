@@ -3,6 +3,7 @@ import PhotosUI
 
 struct GalleryView: View {
     @EnvironmentObject var galleryVM: GalleryViewModel
+    @EnvironmentObject var directoryVM: DirectoryViewModel
     @State private var showUpload    = false
     @State private var selectedPhoto: SharedPhoto?
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 2), count: 3)
@@ -43,6 +44,9 @@ struct GalleryView: View {
                                 ForEach(galleryVM.displayedPhotos) { photo in
                                     photoThumbnail(photo)
                                         .onTapGesture { selectedPhoto = photo }
+                                        .accessibilityLabel(photo.caption ?? "Photo by \(photo.uploaderName)")
+                                        .accessibilityHint("Double-tap to view")
+                                        .accessibilityAddTraits(.isButton)
                                 }
                             }
                         }
@@ -60,15 +64,19 @@ struct GalleryView: View {
                             .font(.title3)
                             .foregroundColor(Theme.navy)
                     }
+                    .frame(minWidth: 44, minHeight: 44)
+                    .accessibilityLabel("Share a photo")
                 }
             }
             .sheet(isPresented: $showUpload) {
                 PhotoUploadView()
                     .environmentObject(galleryVM)
+                    .environmentObject(directoryVM)
             }
             .sheet(item: $selectedPhoto) { photo in
                 PhotoDetailView(photo: photo)
                     .environmentObject(galleryVM)
+                    .environmentObject(directoryVM)
             }
         }
     }
@@ -126,5 +134,4 @@ struct GalleryView: View {
         }
     }
 
-    @State private var showUpload2 = false
 }

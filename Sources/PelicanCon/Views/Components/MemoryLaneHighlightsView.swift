@@ -32,6 +32,9 @@ struct MemoryLaneHighlightsView: View {
                         ForEach(highlights) { photo in
                             HighlightTile(photo: photo)
                                 .onTapGesture { onPhotoTap(photo) }
+                                .accessibilityLabel("\(photo.caption ?? "Memory Lane photo") by \(photo.uploaderName), \(photo.likeCount) like\(photo.likeCount == 1 ? "" : "s")")
+                                .accessibilityHint("Double-tap to view")
+                                .accessibilityAddTraits(.isButton)
                         }
                     }
                     .padding(.horizontal, 16)
