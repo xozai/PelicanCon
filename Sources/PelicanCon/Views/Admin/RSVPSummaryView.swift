@@ -8,7 +8,12 @@ struct RSVPSummaryView: View {
     @State private var isLoading  = true
     @State private var showShare  = false
     @State private var csvURL:    URL?
-    @State private var streamTask: Task<Void, Never>?
+    // Two separate long-running stream tasks (never-terminating for await loops
+    // cannot be composed with async let — each needs its own Task).
+    @State private var eventsTask: Task<Void, Never>?
+    @State private var usersTask:  Task<Void, Never>?
+    @State private var eventsLoaded = false
+    @State private var usersLoaded  = false
 
     var body: some View {
         ZStack {
@@ -44,7 +49,10 @@ struct RSVPSummaryView: View {
             }
         }
         .onAppear { startListeners() }
-        .onDisappear { streamTask?.cancel() }
+        .onDisappear {
+            eventsTask?.cancel()
+            usersTask?.cancel()
+        }
     }
 
     // MARK: - Event section
@@ -140,24 +148,28 @@ struct RSVPSummaryView: View {
     // MARK: - Data loading
 
     private func startListeners() {
-        isLoading  = true
-        streamTask = Task {
-            async let eventsTask = loadEvents()
-            async let usersTask  = loadUsers()
-            _ = await (eventsTask, usersTask)
-            isLoading = false
-        }
-    }
+        isLoading    = true
+        eventsLoaded = false
+        usersLoaded  = false
 
-    private func loadEvents() async {
-        for await loaded in EventService.shared.eventsStream() {
-            events = loaded
+        eventsTask = Task { @MainActor in
+            for await loaded in EventService.shared.eventsStream() {
+                events = loaded
+                if !eventsLoaded {
+                    eventsLoaded = true
+                    if usersLoaded { isLoading = false }
+                }
+            }
         }
-    }
 
-    private func loadUsers() async {
-        for await loaded in UserService.shared.allUsersStream() {
-            users = loaded
+        usersTask = Task { @MainActor in
+            for await loaded in UserService.shared.allUsersStream() {
+                users = loaded
+                if !usersLoaded {
+                    usersLoaded = true
+                    if eventsLoaded { isLoading = false }
+                }
+            }
         }
     }
 }

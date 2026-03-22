@@ -4,7 +4,8 @@ struct ScheduleView: View {
     @EnvironmentObject var eventVM:   EventViewModel
     @EnvironmentObject var authVM:    AuthViewModel
     @EnvironmentObject var galleryVM: GalleryViewModel
-    @State private var selectedEvent: ReunionEvent?
+    @State private var selectedEvent:     ReunionEvent?
+    @State private var selectedHighlight: SharedPhoto?
     @State private var showAnnouncements = false
 
     var body: some View {
@@ -25,8 +26,7 @@ struct ScheduleView: View {
 
                             // Memory Lane highlights carousel
                             MemoryLaneHighlightsView { photo in
-                                // tapping a highlight opens the photo detail
-                                galleryVM.selectedPhoto = photo
+                                selectedHighlight = photo
                             }
 
                             // Event groups
@@ -81,6 +81,10 @@ struct ScheduleView: View {
             .sheet(item: $selectedEvent) { event in
                 EventDetailView(event: event)
                     .environmentObject(eventVM)
+            }
+            .sheet(item: $selectedHighlight) { photo in
+                PhotoDetailView(photo: photo)
+                    .environmentObject(galleryVM)
             }
             .alert("Calendar", isPresented: .constant(eventVM.calendarSuccessMessage != nil)) {
                 Button("OK") { eventVM.clearCalendarSuccess() }
