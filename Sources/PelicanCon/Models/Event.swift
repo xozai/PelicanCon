@@ -15,7 +15,7 @@ struct ReunionEvent: Identifiable, Codable, Equatable {
     var emoji: String
     var rsvps: [String: RSVPStatus]   // [userID: status]
     var createdBy: String
-    var sourceType: String            // "manual" | "ical"
+    var sourceType: String = "manual" // "manual" | "ical" — defaults so old docs decode cleanly
 
     var coordinate: CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: latitude, longitude: longitude)

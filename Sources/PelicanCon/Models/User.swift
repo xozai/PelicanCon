@@ -14,7 +14,7 @@ struct AppUser: Identifiable, Codable, Equatable {
     var socialLinks: [String: String]
     var notificationPreferences: NotificationPreferences
     var fcmToken: String?
-    var isAdmin: Bool
+    var isAdmin: Bool = false
     var createdAt: Date
     var lastSeen: Date
 
