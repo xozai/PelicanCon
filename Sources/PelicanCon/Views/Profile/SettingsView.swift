@@ -6,7 +6,10 @@ struct SettingsView: View {
     @Environment(\.dismiss) var dismiss
 
     @State private var prefs: NotificationPreferences = NotificationPreferences()
-    @State private var showDeleteConfirm = false
+    @State private var showDeleteConfirm  = false
+    @State private var showPrivacy        = false
+    @State private var showTerms          = false
+    @State private var isDeletingAccount  = false
 
     var body: some View {
         NavigationStack {
@@ -47,10 +50,10 @@ struct SettingsView: View {
                         LabeledContent("Version", value: "1.0.0")
                         LabeledContent("Class Year", value: "1991")
                         LabeledContent("Reunion", value: "35th Anniversary")
-                        Link("Privacy Policy",
-                             destination: URL(string: "https://pelicancon.app/privacy")!)
-                        Link("Terms of Service",
-                             destination: URL(string: "https://pelicancon.app/terms")!)
+                        Button("Privacy Policy") { showPrivacy = true }
+                            .foregroundColor(Theme.red)
+                        Button("Terms of Use") { showTerms = true }
+                            .foregroundColor(Theme.red)
                     }
 
                     // Danger zone
@@ -65,8 +68,16 @@ struct SettingsView: View {
                         Button(role: .destructive) {
                             showDeleteConfirm = true
                         } label: {
-                            Label("Delete My Account", systemImage: "person.crop.circle.badge.minus")
+                            if isDeletingAccount {
+                                HStack(spacing: 8) {
+                                    ProgressView()
+                                    Text("Deleting account…")
+                                }
+                            } else {
+                                Label("Delete My Account", systemImage: "person.crop.circle.badge.minus")
+                            }
                         }
+                        .disabled(isDeletingAccount)
                     }
                 }
                 .scrollContentBackground(.hidden)
@@ -76,9 +87,7 @@ struct SettingsView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Done") {
-                        Task {
-                            await profileVM.saveNotificationPreferences(prefs)
-                        }
+                        Task { await profileVM.saveNotificationPreferences(prefs) }
                         dismiss()
                     }
                     .foregroundColor(Theme.navy)
@@ -89,15 +98,20 @@ struct SettingsView: View {
                     ?? authVM.currentUser?.notificationPreferences
                     ?? NotificationPreferences()
             }
+            .sheet(isPresented: $showPrivacy) { PrivacyPolicyView() }
+            .sheet(isPresented: $showTerms)   { PrivacyPolicyView() } // same doc, different anchor
             .confirmationDialog("Delete Account", isPresented: $showDeleteConfirm) {
-                Button("Delete My Account", role: .destructive) {
-                    // In production: call Firebase to delete auth user + Firestore data
-                    authVM.signOut()
-                    dismiss()
+                Button("Delete My Account Permanently", role: .destructive) {
+                    Task {
+                        isDeletingAccount = true
+                        await authVM.deleteAccount()
+                        isDeletingAccount = false
+                        dismiss()
+                    }
                 }
                 Button("Cancel", role: .cancel) {}
             } message: {
-                Text("This will permanently delete your account and all your data. This cannot be undone.")
+                Text("This permanently deletes your profile, photos, messages, and login. This cannot be undone.")
             }
         }
     }

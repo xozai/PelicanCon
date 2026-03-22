@@ -52,14 +52,27 @@
     <key>NSUserNotificationsUsageDescription</key>
     <string>PelicanCon sends reminders for upcoming events and notifies you of new messages and photos from classmates.</string>
 
-    <!-- URL schemes (Google Sign-In) -->
+    <!-- URL schemes (Google Sign-In)
+         SETUP REQUIRED: Replace the REVERSED_CLIENT_ID value below with the actual
+         value from your GoogleService-Info.plist (field REVERSED_CLIENT_ID).
+         Example: com.googleusercontent.apps.123456789-abc123def456
+         Failing to do this will crash Google Sign-In at runtime. -->
     <key>CFBundleURLTypes</key>
     <array>
         <dict>
+            <key>CFBundleURLName</key>
+            <string>com.pelicancon.google-signin</string>
             <key>CFBundleURLSchemes</key>
             <array>
-                <!-- Replace with your REVERSED_CLIENT_ID from GoogleService-Info.plist -->
-                <string>com.googleusercontent.apps.YOUR-REVERSED-CLIENT-ID</string>
+                <string>$(GOOGLE_REVERSED_CLIENT_ID)</string>
+            </array>
+        </dict>
+        <dict>
+            <key>CFBundleURLName</key>
+            <string>com.pelicancon.app</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>com.pelicancon.app</string>
             </array>
         </dict>
     </array>
@@ -70,6 +83,29 @@
         <string>maps</string>
         <string>comgooglemaps</string>
     </array>
+
+    <!-- App icon (set) -->
+    <key>CFBundleIcons</key>
+    <dict>
+        <key>CFBundlePrimaryIcon</key>
+        <dict>
+            <key>CFBundleIconFiles</key>
+            <array>
+                <string>AppIcon</string>
+            </array>
+            <key>UIPrerenderedIcon</key>
+            <false/>
+        </dict>
+    </dict>
+
+    <!-- Launch screen -->
+    <key>UILaunchScreen</key>
+    <dict>
+        <key>UIColorName</key>
+        <string>LaunchBackground</string>
+        <key>UIImageName</key>
+        <string>LaunchLogo</string>
+    </dict>
 
     <!-- Main scene config -->
     <key>UIApplicationSceneManifest</key>

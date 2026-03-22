@@ -1,9 +1,11 @@
 import SwiftUI
 
 struct ScheduleView: View {
-    @EnvironmentObject var eventVM: EventViewModel
-    @EnvironmentObject var authVM: AuthViewModel
+    @EnvironmentObject var eventVM:   EventViewModel
+    @EnvironmentObject var authVM:    AuthViewModel
+    @EnvironmentObject var galleryVM: GalleryViewModel
     @State private var selectedEvent: ReunionEvent?
+    @State private var showAnnouncements = false
 
     var body: some View {
         NavigationStack {
@@ -20,6 +22,12 @@ struct ScheduleView: View {
                         VStack(spacing: 24) {
                             // Banner
                             reuniteBanner
+
+                            // Memory Lane highlights carousel
+                            MemoryLaneHighlightsView { photo in
+                                // tapping a highlight opens the photo detail
+                                galleryVM.selectedPhoto = photo
+                            }
 
                             // Event groups
                             ForEach(eventVM.groupedEvents, id: \.day) { group in
@@ -58,8 +66,16 @@ struct ScheduleView: View {
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Image(systemName: "bird.fill")
-                        .foregroundColor(Theme.gold)
+                    Button {
+                        showAnnouncements = true
+                    } label: {
+                        Image(systemName: "megaphone.fill").foregroundColor(Theme.gold)
+                    }
+                }
+            }
+            .sheet(isPresented: $showAnnouncements) {
+                NavigationStack {
+                    AnnouncementsView().environmentObject(authVM)
                 }
             }
             .sheet(item: $selectedEvent) { event in

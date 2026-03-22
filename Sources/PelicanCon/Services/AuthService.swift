@@ -15,6 +15,13 @@ final class AuthService: ObservableObject {
     // MARK: - Email / Password
 
     func signUp(email: String, password: String, displayName: String) async throws -> FirebaseAuth.User {
+        // Check invite gate before creating the account
+        if let gateError = await InviteGateService.shared.validateEmail(email) {
+            throw AuthError.notInvited(gateError)
+        }
+        if await AdminService.shared.isEmailBanned(email) {
+            throw AuthError.accountRemoved
+        }
         let result = try await auth.createUser(withEmail: email, password: password)
         let changeRequest = result.user.createProfileChangeRequest()
         changeRequest.displayName = displayName
@@ -162,6 +169,7 @@ enum AuthError: LocalizedError {
     case missingToken
     case invalidAppleCredential
     case accountRemoved
+    case notInvited(String)
 
     var errorDescription: String? {
         switch self {
@@ -169,6 +177,7 @@ enum AuthError: LocalizedError {
         case .missingToken:            return "Authentication token was missing."
         case .invalidAppleCredential:  return "Apple Sign In credential was invalid."
         case .accountRemoved:          return "This account has been removed. Please contact an organizer if you believe this is an error."
+        case .notInvited(let msg):     return msg
         }
     }
 }

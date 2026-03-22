@@ -10,14 +10,26 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
-        // Request notification permissions
         UNUserNotificationCenter.current().delegate = self
-        requestNotificationPermission(application)
-
-        // Set FCM messaging delegate
+        // NOTE: Notification permission is requested at the end of ProfileSetupView
+        // (after the user understands the app's purpose) — not here at cold launch.
         Messaging.messaging().delegate = self
-
         return true
+    }
+
+    /// Called from ProfileSetupView once the user has completed onboarding.
+    func requestNotificationPermissionIfNeeded() {
+        let options: UNAuthorizationOptions = [.alert, .badge, .sound]
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            guard settings.authorizationStatus == .notDetermined else { return }
+            UNUserNotificationCenter.current().requestAuthorization(options: options) { granted, _ in
+                if granted {
+                    DispatchQueue.main.async {
+                        UIApplication.shared.registerForRemoteNotifications()
+                    }
+                }
+            }
+        }
     }
 
     // MARK: - Google Sign-In URL handling
@@ -44,20 +56,6 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         print("[AppDelegate] Failed to register for remote notifications: \(error.localizedDescription)")
     }
 
-    // MARK: - Private
-    private func requestNotificationPermission(_ application: UIApplication) {
-        let options: UNAuthorizationOptions = [.alert, .badge, .sound]
-        UNUserNotificationCenter.current().requestAuthorization(options: options) { granted, error in
-            if granted {
-                DispatchQueue.main.async {
-                    application.registerForRemoteNotifications()
-                }
-            }
-            if let error {
-                print("[AppDelegate] Notification permission error: \(error.localizedDescription)")
-            }
-        }
-    }
 }
 
 // MARK: - UNUserNotificationCenterDelegate

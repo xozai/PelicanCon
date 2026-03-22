@@ -96,6 +96,21 @@ final class AdminService {
         try? await batch.commit()
     }
 
+    // MARK: - Self-Deletion (user deletes their own account — Apple / GDPR requirement)
+
+    /// Full self-deletion pipeline: photos → DM lists → Firestore doc → Firebase Auth
+    func deleteOwnAccount(user: AppUser) async throws {
+        guard let uid = user.id else { throw AdminError.missingUserId }
+
+        try await deleteUserPhotos(uid: uid)
+        await removeFromConversations(uid: uid)
+        try await usersRef.document(uid).delete()
+
+        // Call Cloud Function to delete the Firebase Auth account
+        let callable = functions.httpsCallable("deleteOwnAccount")
+        _ = try await callable.call([:])
+    }
+
     // MARK: - Ban Check (called at sign-in)
 
     func isUserBanned(uid: String) async -> Bool {

@@ -185,6 +185,10 @@ struct ProfileSetupView: View {
                 bio:         bio.isEmpty ? nil : bio,
                 currentCity: currentCity.isEmpty ? nil : currentCity
             )
+            // Request notification permission now that user understands the app
+            if let delegate = UIApplication.shared.delegate as? AppDelegate {
+                delegate.requestNotificationPermissionIfNeeded()
+            }
             isSaving = false
         }
     }

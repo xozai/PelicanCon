@@ -51,6 +51,7 @@ final class AuthViewModel: ObservableObject {
             let user          = try await userService.fetchUser(id: uid)
             currentUser       = user
             isProfileComplete = !user.displayName.isEmpty && user.currentCity != nil
+            CrashlyticsService.setUser(user)
         } catch {
             // New user — no profile doc yet
             currentUser       = nil
@@ -183,6 +184,7 @@ final class AuthViewModel: ObservableObject {
     func signOut() {
         do {
             try authService.signOut()
+            CrashlyticsService.clearUser()
             currentUser       = nil
             isProfileComplete = false
         } catch {
@@ -202,6 +204,23 @@ final class AuthViewModel: ObservableObject {
 
     func prepareAppleSignIn() -> String {
         authService.prepareAppleSignIn()
+    }
+
+    // MARK: - Account Deletion (Apple App Store requirement)
+
+    func deleteAccount() async {
+        guard let user = currentUser else { return }
+        isSigningIn  = true
+        errorMessage = nil
+        do {
+            try await AdminService.shared.deleteOwnAccount(user: user)
+            try authService.signOut()
+            currentUser       = nil
+            isProfileComplete = false
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+        isSigningIn = false
     }
 
     func clearError() { errorMessage = nil }

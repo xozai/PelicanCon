@@ -244,4 +244,52 @@ Parser responsibilities:
 
 ---
 
+---
+
+## Additional Cloud Functions Required (Pre-Submission)
+
+### `deleteOwnAccount` — User self-deletion (App Store requirement)
+```javascript
+export const deleteOwnAccount = functions.https.onCall(async (data, context) => {
+  if (!context.auth) throw new functions.https.HttpsError("unauthenticated", "Must be signed in.");
+  await admin.auth().revokeRefreshTokens(context.auth.uid);
+  await admin.auth().deleteUser(context.auth.uid);
+  return { success: true };
+});
+```
+
+### `broadcastAnnouncement` — FCM multicast to all attendees
+```javascript
+export const broadcastAnnouncement = functions.https.onCall(async (data, context) => {
+  if (!context.auth) throw new functions.https.HttpsError("unauthenticated", "Must be signed in.");
+  const callerDoc = await admin.firestore().doc(`users/${context.auth.uid}`).get();
+  if (!callerDoc.data()?.isAdmin) throw new functions.https.HttpsError("permission-denied", "Admins only.");
+
+  const { title, body } = data;
+  const usersSnap = await admin.firestore().collection("users").get();
+  const tokens = usersSnap.docs
+    .map(d => d.data().fcmToken)
+    .filter(Boolean);
+
+  if (tokens.length === 0) return { sent: 0 };
+
+  // Send in batches of 500 (FCM multicast limit)
+  const batches = [];
+  for (let i = 0; i < tokens.length; i += 500) {
+    batches.push(tokens.slice(i, i + 500));
+  }
+  let sent = 0;
+  for (const batch of batches) {
+    const result = await admin.messaging().sendEachForMulticast({
+      tokens: batch,
+      notification: { title, body },
+      data: { type: "announcement" },
+      apns: { payload: { aps: { sound: "default" } } },
+    });
+    sent += result.successCount;
+  }
+  return { sent };
+});
+```
+
 *PelicanCon Admin Features — Class of 1991 · 35th Reunion*

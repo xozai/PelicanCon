@@ -1,8 +1,9 @@
 import SwiftUI
 
 struct MainTabView: View {
-    @EnvironmentObject var authVM: AuthViewModel
+    @EnvironmentObject var authVM:            AuthViewModel
     @EnvironmentObject var notificationService: NotificationService
+    @EnvironmentObject var networkMonitor:    NetworkMonitor
 
     @StateObject private var eventVM     = EventViewModel()
     @StateObject private var chatVM      = ChatViewModel()
@@ -15,45 +16,41 @@ struct MainTabView: View {
     private var currentUser: AppUser? { authVM.currentUser }
 
     var body: some View {
-        TabView(selection: $selectedTab) {
-            ScheduleView()
-                .tabItem {
-                    Label("Schedule", systemImage: "calendar")
-                }
-                .tag(0)
-                .environmentObject(eventVM)
+        ZStack(alignment: .top) {
+            TabView(selection: $selectedTab) {
+                ScheduleView()
+                    .tabItem { Label("Schedule", systemImage: "calendar") }
+                    .tag(0)
+                    .environmentObject(eventVM)
 
-            ChatListView()
-                .tabItem {
-                    Label("Chat", systemImage: "message.fill")
-                }
-                .badge(chatVM.totalUnreadDMs())
-                .tag(1)
-                .environmentObject(chatVM)
+                ChatListView()
+                    .tabItem { Label("Chat", systemImage: "message.fill") }
+                    .badge(chatVM.totalUnreadDMs())
+                    .tag(1)
+                    .environmentObject(chatVM)
 
-            GalleryView()
-                .tabItem {
-                    Label("Photos", systemImage: "photo.stack.fill")
-                }
-                .tag(2)
-                .environmentObject(galleryVM)
+                GalleryView()
+                    .tabItem { Label("Photos", systemImage: "photo.stack.fill") }
+                    .tag(2)
+                    .environmentObject(galleryVM)
 
-            DirectoryView()
-                .tabItem {
-                    Label("Directory", systemImage: "person.2.fill")
-                }
-                .tag(3)
-                .environmentObject(directoryVM)
-                .environmentObject(chatVM)
+                DirectoryView()
+                    .tabItem { Label("Directory", systemImage: "person.2.fill") }
+                    .tag(3)
+                    .environmentObject(directoryVM)
+                    .environmentObject(chatVM)
 
-            ProfileView()
-                .tabItem {
-                    Label("Profile", systemImage: "person.crop.circle.fill")
-                }
-                .tag(4)
-                .environmentObject(profileVM)
+                ProfileView()
+                    .tabItem { Label("Profile", systemImage: "person.crop.circle.fill") }
+                    .tag(4)
+                    .environmentObject(profileVM)
+            }
+            .tint(Theme.red)
+
+            // Offline banner — overlays all tabs
+            OfflineBanner()
+                .animation(.easeInOut(duration: 0.3), value: networkMonitor.isConnected)
         }
-        .tint(Theme.red)
         .onAppear {
             setupViewModels()
             startAllListeners()

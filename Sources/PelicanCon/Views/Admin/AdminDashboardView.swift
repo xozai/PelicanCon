@@ -45,6 +45,34 @@ struct AdminDashboardView: View {
                                         .environmentObject(authVM)
                                 )
                             )
+
+                            adminNavCard(
+                                icon:     "megaphone.fill",
+                                iconColor: Theme.red,
+                                title:    "Post Announcement",
+                                subtitle: "Broadcast a message to all attendees",
+                                destination: AnyView(
+                                    AnnouncementsView().environmentObject(authVM)
+                                )
+                            )
+
+                            adminNavCard(
+                                icon:     "lock.shield.fill",
+                                iconColor: Theme.navy,
+                                title:    "Invite List",
+                                subtitle: "Manage who can register",
+                                destination: AnyView(InviteListView())
+                            )
+
+                            adminNavCard(
+                                icon:     "chart.bar.fill",
+                                iconColor: Theme.navy,
+                                title:    "RSVP Summary",
+                                subtitle: "Per-event attendance breakdown",
+                                destination: AnyView(
+                                    RSVPSummaryView().environmentObject(authVM)
+                                )
+                            )
                         }
 
                         Spacer(minLength: 40)

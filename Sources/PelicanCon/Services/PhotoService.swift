@@ -12,6 +12,9 @@ final class PhotoService {
 
     // MARK: - Upload
 
+    static let maxPhotosPerUser = 20
+    static let maxDimensionPx:  CGFloat = 1920
+
     func uploadPhoto(
         uploaderId: String,
         uploaderName: String,
@@ -20,19 +23,29 @@ final class PhotoService {
         caption: String?,
         isMemoryLane: Bool
     ) async throws -> SharedPhoto {
+        // Enforce per-user photo limit
+        let existing = try await photosRef
+            .whereField("uploaderId", isEqualTo: uploaderId)
+            .count
+            .getAggregation(source: .server)
+        if Int(truncating: existing.count) >= PhotoService.maxPhotosPerUser {
+            throw PhotoError.limitReached(PhotoService.maxPhotosPerUser)
+        }
+
         let photoId = UUID().uuidString
 
-        // Upload full-size image
-        let fullData = image.jpegData(compressionQuality: 0.85) ?? Data()
+        // Downscale to max 1920px on longest side, then compress
+        let scaled   = image.scaledToMaxDimension(PhotoService.maxDimensionPx) ?? image
+        let fullData = scaled.jpegData(compressionQuality: 0.75) ?? Data()
         let fullRef  = storage.reference().child("photos/\(photoId)/full.jpg")
         let meta     = StorageMetadata(); meta.contentType = "image/jpeg"
         _ = try await fullRef.putDataAsync(fullData, metadata: meta)
         let fullURL = try await fullRef.downloadURL()
 
-        // Upload thumbnail (smaller)
-        let thumbSize = CGSize(width: 300, height: 300)
+        // Thumbnail: 400×400, quality 0.55
+        let thumbSize  = CGSize(width: 400, height: 400)
         let thumbImage = image.resized(to: thumbSize) ?? image
-        let thumbData  = thumbImage.jpegData(compressionQuality: 0.6) ?? Data()
+        let thumbData  = thumbImage.jpegData(compressionQuality: 0.55) ?? Data()
         let thumbRef   = storage.reference().child("photos/\(photoId)/thumb.jpg")
         _ = try await thumbRef.putDataAsync(thumbData, metadata: meta)
         let thumbURL = try await thumbRef.downloadURL()
@@ -135,12 +148,34 @@ final class PhotoService {
     }
 }
 
-// MARK: - UIImage resize helper
+// MARK: - Photo Errors
+
+enum PhotoError: LocalizedError {
+    case limitReached(Int)
+    var errorDescription: String? {
+        switch self {
+        case .limitReached(let n):
+            return "You've reached the \(n)-photo limit. Delete an existing photo to upload a new one."
+        }
+    }
+}
+
+// MARK: - UIImage helpers
+
 private extension UIImage {
     func resized(to size: CGSize) -> UIImage? {
         UIGraphicsBeginImageContextWithOptions(size, false, 0)
         defer { UIGraphicsEndImageContext() }
         draw(in: CGRect(origin: .zero, size: size))
         return UIGraphicsGetImageFromCurrentImageContext()
+    }
+
+    /// Scales the image down so its longest side is at most `maxPx` points.
+    func scaledToMaxDimension(_ maxPx: CGFloat) -> UIImage? {
+        let longest = max(size.width, size.height)
+        guard longest > maxPx else { return self }
+        let scale    = maxPx / longest
+        let newSize  = CGSize(width: size.width * scale, height: size.height * scale)
+        return resized(to: newSize)
     }
 }
