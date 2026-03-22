@@ -22,6 +22,7 @@ struct MainTabView: View {
                     .tabItem { Label("Schedule", systemImage: "calendar") }
                     .tag(0)
                     .environmentObject(eventVM)
+                    .environmentObject(galleryVM)
 
                 ChatListView()
                     .tabItem { Label("Chat", systemImage: "message.fill") }
