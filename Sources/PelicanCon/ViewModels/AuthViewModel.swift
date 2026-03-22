@@ -40,6 +40,13 @@ final class AuthViewModel: ObservableObject {
     }
 
     private func loadAppUser(uid: String, firebaseUser: FirebaseAuth.User) async {
+        // Guard: sign out immediately if the account has been banned by an admin
+        if await AdminService.shared.isUserBanned(uid: uid) {
+            try? authService.signOut()
+            errorMessage = AuthError.accountRemoved.errorDescription
+            isLoading    = false
+            return
+        }
         do {
             let user          = try await userService.fetchUser(id: uid)
             currentUser       = user
@@ -70,6 +77,7 @@ final class AuthViewModel: ObservableObject {
                 graduationYear: 1991,
                 socialLinks: [:],
                 notificationPreferences: NotificationPreferences(),
+                isAdmin:     false,
                 createdAt:   Date(),
                 lastSeen:    Date()
             )

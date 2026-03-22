@@ -4,8 +4,9 @@ import PhotosUI
 struct ProfileView: View {
     @EnvironmentObject var profileVM: ProfileViewModel
     @EnvironmentObject var authVM: AuthViewModel
-    @State private var showEditProfile  = false
-    @State private var showSettings     = false
+    @State private var showEditProfile   = false
+    @State private var showSettings      = false
+    @State private var showAdminDashboard = false
     @State private var selectedPhotoItem: PhotosPickerItem?
 
     private var user: AppUser? { authVM.currentUser }
@@ -85,6 +86,26 @@ struct ProfileView: View {
                                     ) { showSettings = true }
                                 }
 
+                                // Admin Dashboard — only visible to admins
+                                if user.isAdmin {
+                                    Button {
+                                        showAdminDashboard = true
+                                    } label: {
+                                        HStack(spacing: 8) {
+                                            Image(systemName: "shield.fill")
+                                            Text("Admin Dashboard")
+                                                .font(.subheadline)
+                                                .fontWeight(.semibold)
+                                        }
+                                        .foregroundColor(.white)
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.vertical, 11)
+                                        .background(Theme.redGradient)
+                                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                                    }
+                                    .transition(.opacity.combined(with: .scale(scale: 0.95)))
+                                }
+
                                 // Stats row
                                 HStack(spacing: 0) {
                                     statTile(value: "1991", label: "Grad Year")
@@ -124,6 +145,10 @@ struct ProfileView: View {
             .sheet(isPresented: $showSettings) {
                 SettingsView()
                     .environmentObject(profileVM)
+                    .environmentObject(authVM)
+            }
+            .sheet(isPresented: $showAdminDashboard) {
+                AdminDashboardView()
                     .environmentObject(authVM)
             }
         }

@@ -23,7 +23,16 @@ final class AuthService: ObservableObject {
     }
 
     func signIn(email: String, password: String) async throws -> FirebaseAuth.User {
+        // Check ban list before completing sign-in
+        if await AdminService.shared.isEmailBanned(email) {
+            throw AuthError.accountRemoved
+        }
         let result = try await auth.signIn(withEmail: email, password: password)
+        // Double-check by UID after auth succeeds
+        if await AdminService.shared.isUserBanned(uid: result.user.uid) {
+            try auth.signOut()
+            throw AuthError.accountRemoved
+        }
         return result.user
     }
 
@@ -152,12 +161,14 @@ enum AuthError: LocalizedError {
     case noRootViewController
     case missingToken
     case invalidAppleCredential
+    case accountRemoved
 
     var errorDescription: String? {
         switch self {
         case .noRootViewController:    return "Unable to present sign-in screen."
         case .missingToken:            return "Authentication token was missing."
         case .invalidAppleCredential:  return "Apple Sign In credential was invalid."
+        case .accountRemoved:          return "This account has been removed. Please contact an organizer if you believe this is an error."
         }
     }
 }

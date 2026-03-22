@@ -15,6 +15,7 @@ struct ReunionEvent: Identifiable, Codable, Equatable {
     var emoji: String
     var rsvps: [String: RSVPStatus]   // [userID: status]
     var createdBy: String
+    var sourceType: String            // "manual" | "ical"
 
     var coordinate: CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
@@ -45,7 +46,7 @@ struct ReunionEvent: Identifiable, Codable, Equatable {
     enum CodingKeys: String, CodingKey {
         case id, title, description, locationName, address
         case latitude, longitude, startTime, endTime
-        case emoji, rsvps, createdBy
+        case emoji, rsvps, createdBy, sourceType
     }
 }
 
@@ -92,7 +93,8 @@ extension ReunionEvent {
                 endTime:   cal.date(bySettingHour: 21, minute: 0, second: 0, of: friday)!,
                 emoji: "🍹",
                 rsvps: ["uid1": .going, "uid2": .going, "uid3": .maybe],
-                createdBy: "admin"
+                createdBy: "admin",
+                sourceType: "manual"
             ),
             ReunionEvent(
                 id: "2",
@@ -105,7 +107,8 @@ extension ReunionEvent {
                 endTime:   cal.date(bySettingHour: 23, minute: 59, second: 0, of: saturday)!,
                 emoji: "🎉",
                 rsvps: ["uid1": .going, "uid2": .going],
-                createdBy: "admin"
+                createdBy: "admin",
+                sourceType: "manual"
             ),
             ReunionEvent(
                 id: "3",
@@ -118,7 +121,8 @@ extension ReunionEvent {
                 endTime:   cal.date(bySettingHour: 13, minute: 0, second: 0, of: sunday)!,
                 emoji: "☀️",
                 rsvps: [:],
-                createdBy: "admin"
+                createdBy: "admin",
+                sourceType: "manual"
             )
         ]
     }

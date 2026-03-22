@@ -14,6 +14,7 @@ struct AppUser: Identifiable, Codable, Equatable {
     var socialLinks: [String: String]
     var notificationPreferences: NotificationPreferences
     var fcmToken: String?
+    var isAdmin: Bool
     var createdAt: Date
     var lastSeen: Date
 
@@ -36,8 +37,19 @@ struct AppUser: Identifiable, Codable, Equatable {
         case id, displayName, maidenName, email, phoneNumber
         case profilePhotoURL, bio, currentCity, graduationYear
         case socialLinks, notificationPreferences, fcmToken
-        case createdAt, lastSeen
+        case isAdmin, createdAt, lastSeen
     }
+}
+
+// MARK: - Banned User record (written by admins on removal)
+struct BannedUser: Codable {
+    @DocumentID var id: String?
+    var uid: String
+    var email: String
+    var displayName: String
+    var removedAt: Date
+    var removedBy: String       // admin uid
+    var reason: String?
 }
 
 struct NotificationPreferences: Codable, Equatable {
@@ -63,6 +75,7 @@ extension AppUser {
             graduationYear: 1991,
             socialLinks: ["linkedin": "linkedin.com/in/alexj"],
             notificationPreferences: NotificationPreferences(),
+            isAdmin: false,
             createdAt: Date(),
             lastSeen: Date()
         )
