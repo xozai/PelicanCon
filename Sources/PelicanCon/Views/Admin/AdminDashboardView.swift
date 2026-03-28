@@ -95,6 +95,26 @@ struct AdminDashboardView: View {
                                     RSVPSummaryView().environmentObject(authVM)
                                 )
                             )
+
+                            adminNavCard(
+                                icon:     "questionmark.bubble.fill",
+                                iconColor: Theme.softBlue,
+                                title:    "Trivia Game",
+                                subtitle: "Host a live trivia game for attendees",
+                                destination: AnyView(
+                                    TriviaView().environmentObject(authVM)
+                                )
+                            )
+
+                            adminNavCard(
+                                icon:     "doc.text.fill",
+                                iconColor: Theme.success,
+                                title:    "Reunion Survey",
+                                subtitle: "Collect memories from classmates",
+                                destination: AnyView(
+                                    SurveyView().environmentObject(authVM)
+                                )
+                            )
                         }
 
                         Spacer(minLength: 40)

@@ -8,6 +8,7 @@ struct ProfileView: View {
     @State private var showSettings      = false
     @State private var showAdminDashboard = false
     @State private var showCheckIn       = false
+    @State private var showStore         = false
     @State private var selectedPhotoItem: PhotosPickerItem?
 
     private var user: AppUser? { authVM.currentUser }
@@ -114,6 +115,31 @@ struct ProfileView: View {
                                 }
                                 .accessibilityLabel("Check-In and Badges")
 
+                                // Merch Store
+                                Button {
+                                    showStore = true
+                                } label: {
+                                    HStack(spacing: 10) {
+                                        Image(systemName: "storefront.fill")
+                                            .font(.system(size: 18))
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text("Reunion Shop")
+                                                .font(.subheadline).fontWeight(.semibold)
+                                            Text("Official Class of '91 merch")
+                                                .font(.caption).foregroundColor(Theme.midGray)
+                                        }
+                                        Spacer()
+                                        Image(systemName: "chevron.right")
+                                            .font(.caption).foregroundColor(Theme.midGray)
+                                    }
+                                    .foregroundColor(Theme.navy)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.horizontal, 16).padding(.vertical, 12)
+                                    .background(Color.white)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                }
+                                .accessibilityLabel("Reunion Shop")
+
                                 // Admin Dashboard — only visible to admins
                                 if user.isAdmin {
                                     Button {
@@ -183,6 +209,9 @@ struct ProfileView: View {
                 if let user {
                     CheckInView(user: user)
                 }
+            }
+            .sheet(isPresented: $showStore) {
+                StoreView()
             }
         }
     }

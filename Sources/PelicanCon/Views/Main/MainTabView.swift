@@ -23,6 +23,7 @@ struct MainTabView: View {
                     .tag(0)
                     .environmentObject(eventVM)
                     .environmentObject(galleryVM)
+                    .environmentObject(directoryVM)
 
                 ChatListView()
                     .tabItem { Label("Chat", systemImage: "message.fill") }

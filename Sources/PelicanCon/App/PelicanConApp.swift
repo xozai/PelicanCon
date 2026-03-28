@@ -1,6 +1,7 @@
 import SwiftUI
 import Firebase
 import FirebaseFirestore
+import FirebaseCrashlytics
 
 @main
 struct PelicanConApp: App {
@@ -9,9 +10,12 @@ struct PelicanConApp: App {
     @StateObject private var notificationService = NotificationService.shared
     @StateObject private var networkMonitor   = NetworkMonitor.shared
 
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
+
     init() {
         FirebaseApp.configure()
         configureFirestore()
+        Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(true)
     }
 
     private func configureFirestore() {
@@ -28,6 +32,8 @@ struct PelicanConApp: App {
             Group {
                 if authViewModel.isLoading {
                     SplashView()
+                } else if !hasCompletedOnboarding {
+                    OnboardingView { hasCompletedOnboarding = true }
                 } else if authViewModel.currentUser == nil {
                     LoginView()
                 } else if !authViewModel.isProfileComplete {

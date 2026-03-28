@@ -105,6 +105,34 @@ final class MessageService {
         try await updateConversationLastMessage(conversationId: conversationId, text: text, senderId: senderId)
     }
 
+    /// Convenience overload used by the offline queue (stores raw reply fields, not a full Message).
+    func sendTextMessage(
+        conversationId: String,
+        senderId: String,
+        senderName: String,
+        senderPhotoURL: String?,
+        text: String,
+        replyToId: String?,
+        replyToText: String?
+    ) async throws {
+        let msg = Message(
+            conversationId:   conversationId,
+            senderId:         senderId,
+            senderName:       senderName,
+            senderPhotoURL:   senderPhotoURL,
+            text:             text,
+            photoURL:         nil,
+            replyToMessageId: replyToId,
+            replyToText:      replyToText,
+            reactions:        [:],
+            readBy:           [senderId],
+            sentAt:           Date()
+        )
+        let msgsRef = conversationsRef.document(conversationId).collection("messages")
+        _ = try msgsRef.addDocument(from: msg)
+        try await updateConversationLastMessage(conversationId: conversationId, text: text, senderId: senderId)
+    }
+
     func sendPhotoMessage(
         conversationId: String,
         senderId: String,

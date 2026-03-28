@@ -156,6 +156,7 @@ struct DirectMessageView: View {
             Button {
                 let text = messageText.trimmingCharacters(in: .whitespacesAndNewlines)
                 guard !text.isEmpty else { return }
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 messageText = ""
                 Task {
                     await chatVM.sendDMMessage(text: text, replyTo: replyingTo)

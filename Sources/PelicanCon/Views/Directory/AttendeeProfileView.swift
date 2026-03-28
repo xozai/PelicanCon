@@ -62,9 +62,20 @@ struct AttendeeProfileView: View {
                                         .foregroundColor(Theme.navy)
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                     ForEach(user.socialLinks.sorted(by: { $0.key < $1.key }), id: \.key) { key, value in
-                                        Label(value, systemImage: socialIcon(for: key))
-                                            .font(.subheadline)
-                                            .foregroundColor(Theme.softBlue)
+                                        if let url = URL(string: value.hasPrefix("http") ? value : "https://\(value)") {
+                                            Link(destination: url) {
+                                                Label(value, systemImage: socialIcon(for: key))
+                                                    .font(.subheadline)
+                                                    .foregroundColor(Theme.softBlue)
+                                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                            }
+                                            .frame(minHeight: 44)
+                                            .accessibilityLabel("Open \(key) profile")
+                                        } else {
+                                            Label(value, systemImage: socialIcon(for: key))
+                                                .font(.subheadline)
+                                                .foregroundColor(Theme.softBlue)
+                                        }
                                     }
                                 }
                                 .padding(16)

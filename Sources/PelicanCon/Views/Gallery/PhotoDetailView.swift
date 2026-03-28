@@ -57,6 +57,7 @@ struct PhotoDetailView: View {
                                 // Like button
                                 let liked = galleryVM.isLiked(photo: photo)
                                 Button {
+                                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
                                     Task { await galleryVM.toggleLike(photo: photo) }
                                 } label: {
                                     VStack(spacing: 2) {

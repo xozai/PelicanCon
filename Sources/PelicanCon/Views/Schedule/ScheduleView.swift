@@ -1,12 +1,15 @@
 import SwiftUI
 
 struct ScheduleView: View {
-    @EnvironmentObject var eventVM:   EventViewModel
-    @EnvironmentObject var authVM:    AuthViewModel
-    @EnvironmentObject var galleryVM: GalleryViewModel
+    @EnvironmentObject var eventVM:     EventViewModel
+    @EnvironmentObject var authVM:      AuthViewModel
+    @EnvironmentObject var galleryVM:   GalleryViewModel
+    @EnvironmentObject var directoryVM: DirectoryViewModel
     @State private var selectedEvent:     ReunionEvent?
     @State private var selectedHighlight: SharedPhoto?
     @State private var showAnnouncements = false
+    @State private var showTrivia        = false
+    @State private var showSurvey        = false
 
     var body: some View {
         NavigationStack {
@@ -56,6 +59,9 @@ struct ScheduleView: View {
                                 }
                             }
 
+                            // Fun & Games section
+                            funSection
+
                             Spacer(minLength: 32)
                         }
                         .padding(.top, 8)
@@ -81,10 +87,17 @@ struct ScheduleView: View {
             .sheet(item: $selectedEvent) { event in
                 EventDetailView(event: event)
                     .environmentObject(eventVM)
+                    .environmentObject(directoryVM)
             }
             .sheet(item: $selectedHighlight) { photo in
                 PhotoDetailView(photo: photo)
                     .environmentObject(galleryVM)
+            }
+            .sheet(isPresented: $showTrivia) {
+                TriviaView().environmentObject(authVM)
+            }
+            .sheet(isPresented: $showSurvey) {
+                SurveyView().environmentObject(authVM)
             }
             .alert("Calendar", isPresented: .constant(eventVM.calendarSuccessMessage != nil)) {
                 Button("OK") { eventVM.clearCalendarSuccess() }
@@ -92,6 +105,75 @@ struct ScheduleView: View {
                 Text(eventVM.calendarSuccessMessage ?? "")
             }
         }
+    }
+
+    private var funSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Fun & Games")
+                .font(.system(size: 17, weight: .bold, design: .serif))
+                .foregroundColor(Theme.navy)
+                .padding(.horizontal, 20)
+
+            HStack(spacing: 12) {
+                funCard(
+                    icon: "questionmark.bubble.fill",
+                    color: Theme.softBlue,
+                    title: "Trivia",
+                    subtitle: "Test your class knowledge"
+                ) { showTrivia = true }
+
+                funCard(
+                    icon: "doc.text.fill",
+                    color: Theme.success,
+                    title: "Survey",
+                    subtitle: "Share your memories"
+                ) { showSurvey = true }
+            }
+            .padding(.horizontal, 20)
+        }
+    }
+
+    private func funCard(
+        icon: String,
+        color: Color,
+        title: String,
+        subtitle: String,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: 10) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(color.opacity(0.12))
+                        .frame(width: 40, height: 40)
+                    Image(systemName: icon)
+                        .font(.system(size: 18))
+                        .foregroundColor(color)
+                }
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(Theme.darkGray)
+                    Text(subtitle)
+                        .font(.caption)
+                        .foregroundColor(Theme.midGray)
+                        .lineLimit(2)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.caption2)
+                    .foregroundColor(Theme.midGray)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+            }
+            .padding(14)
+            .frame(maxWidth: .infinity, minHeight: 110, alignment: .topLeading)
+            .background(Color.white)
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .shadow(color: Theme.cardShadow, radius: 4, x: 0, y: 2)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(title)
+        .accessibilityHint(subtitle)
     }
 
     private var reuniteBanner: some View {

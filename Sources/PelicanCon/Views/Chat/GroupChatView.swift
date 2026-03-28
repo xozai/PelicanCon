@@ -106,6 +106,7 @@ struct GroupChatView: View {
             Button {
                 let text = messageText.trimmingCharacters(in: .whitespacesAndNewlines)
                 guard !text.isEmpty else { return }
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 messageText = ""
                 Task {
                     await chatVM.sendGroupMessage(text: text, replyTo: replyingTo)

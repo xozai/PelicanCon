@@ -4,6 +4,7 @@ import MapKit
 struct EventDetailView: View {
     let event: ReunionEvent
     @EnvironmentObject var eventVM: EventViewModel
+    @EnvironmentObject var directoryVM: DirectoryViewModel
     @Environment(\.dismiss) var dismiss
     @State private var mapRegion: MKCoordinateRegion
     @State private var showVenueGuide = false
@@ -77,7 +78,34 @@ struct EventDetailView: View {
                                 }
                             }
 
-                            Text("\(event.goingCount) classmates going")
+                            // Going attendee avatars
+                            let goingIds = eventVM.goingAttendeeIds(for: event)
+                            let goingUsers = directoryVM.allUsers.filter { goingIds.contains($0.id ?? "") }
+                            if !goingUsers.isEmpty {
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: -10) {
+                                        ForEach(goingUsers.prefix(12)) { user in
+                                            AvatarView(user: user, size: 32)
+                                                .overlay(
+                                                    Circle().stroke(Color.white, lineWidth: 2)
+                                                )
+                                        }
+                                        if goingUsers.count > 12 {
+                                            ZStack {
+                                                Circle()
+                                                    .fill(Theme.lightGray)
+                                                    .frame(width: 32, height: 32)
+                                                Text("+\(goingUsers.count - 12)")
+                                                    .font(.system(size: 10, weight: .semibold))
+                                                    .foregroundColor(Theme.midGray)
+                                            }
+                                            .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                                        }
+                                    }
+                                }
+                            }
+
+                            Text("\(event.goingCount) classmate\(event.goingCount == 1 ? "" : "s") going")
                                 .font(.caption)
                                 .foregroundColor(Theme.midGray)
                         }
@@ -148,6 +176,7 @@ struct EventDetailView: View {
     private func rsvpButton(_ status: RSVPStatus) -> some View {
         let isSelected = eventVM.currentRSVP(for: event) == status
         return Button {
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
             Task { await eventVM.updateRSVP(event: event, status: status) }
         } label: {
             HStack(spacing: 5) {

@@ -42,6 +42,20 @@ final class ChatViewModel: ObservableObject {
               let name  = currentUserName,
               !text.trimmingCharacters(in: .whitespaces).isEmpty else { return }
         isSending = true
+        if !NetworkMonitor.shared.isConnected {
+            let pending = PendingMessage(
+                conversationId:   groupConversationId,
+                senderId:         uid,
+                senderName:       name,
+                senderPhotoURL:   currentUserPhoto,
+                text:             text,
+                replyToMessageId: replyTo?.id,
+                replyToText:      replyTo?.text
+            )
+            await MessageQueueService.shared.enqueue(pending)
+            isSending = false
+            return
+        }
         do {
             try await messageService.sendTextMessage(
                 conversationId: groupConversationId,
@@ -129,6 +143,20 @@ final class ChatViewModel: ObservableObject {
               let name   = currentUserName,
               !text.trimmingCharacters(in: .whitespaces).isEmpty else { return }
         isSending = true
+        if !NetworkMonitor.shared.isConnected {
+            let pending = PendingMessage(
+                conversationId:   convId,
+                senderId:         uid,
+                senderName:       name,
+                senderPhotoURL:   currentUserPhoto,
+                text:             text,
+                replyToMessageId: replyTo?.id,
+                replyToText:      replyTo?.text
+            )
+            await MessageQueueService.shared.enqueue(pending)
+            isSending = false
+            return
+        }
         do {
             try await messageService.sendTextMessage(
                 conversationId: convId,
