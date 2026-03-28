@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Push Notifications (APNs)
+         Value "development" is the on-disk baseline.
+         Xcode automatically substitutes "production" when signing
+         an Archive with a distribution certificate — no manual
+         toggle required between Debug and Release. -->
+    <key>aps-environment</key>
+    <string>development</string>
+
+    <!-- Sign In with Apple — configured as the primary provider -->
+    <key>com.apple.developer.applesignin</key>
+    <array>
+        <string>Default</string>
+    </array>
+</dict>
+</plist>
