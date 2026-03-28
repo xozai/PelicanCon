@@ -14,7 +14,36 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         // NOTE: Notification permission is requested at the end of ProfileSetupView
         // (after the user understands the app's purpose) — not here at cold launch.
         Messaging.messaging().delegate = self
+        registerNotificationCategories()
         return true
+    }
+
+    /// Register actionable notification categories.
+    /// - MESSAGE: inline reply action
+    /// - EVENT_REMINDER: no actions (just a tap-to-open)
+    private func registerNotificationCategories() {
+        let replyAction = UNTextInputNotificationAction(
+            identifier: "REPLY_ACTION",
+            title: "Reply",
+            options: [],
+            textInputButtonTitle: "Send",
+            textInputPlaceholder: "Write a reply…"
+        )
+        let messageCategory = UNNotificationCategory(
+            identifier: "MESSAGE",
+            actions: [replyAction],
+            intentIdentifiers: [],
+            options: [.customDismissAction]
+        )
+        let eventCategory = UNNotificationCategory(
+            identifier: "EVENT_REMINDER",
+            actions: [],
+            intentIdentifiers: [],
+            options: []
+        )
+        UNUserNotificationCenter.current().setNotificationCategories(
+            [messageCategory, eventCategory]
+        )
     }
 
     /// Called from ProfileSetupView once the user has completed onboarding.
@@ -70,14 +99,34 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         completionHandler([.banner, .badge, .sound])
     }
 
-    /// Handle notification tap
+    /// Handle notification tap or action
     func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse,
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
         let userInfo = response.notification.request.content.userInfo
-        NotificationService.shared.handleNotificationTap(userInfo: userInfo)
+
+        // Inline reply from lock screen / notification banner
+        if response.actionIdentifier == "REPLY_ACTION",
+           let textInput = response as? UNTextInputNotificationResponse,
+           let convId    = userInfo["conversationId"] as? String {
+            let replyText = textInput.userText
+            Task {
+                guard let uid  = AuthService.shared.currentUserId,
+                      let name = await UserService.shared.fetchDisplayName(userId: uid),
+                      !replyText.trimmingCharacters(in: .whitespaces).isEmpty else { return }
+                try? await MessageService.shared.sendTextMessage(
+                    conversationId: convId,
+                    senderId:       uid,
+                    senderName:     name,
+                    senderPhotoURL: nil,
+                    text:           replyText
+                )
+            }
+        } else {
+            NotificationService.shared.handleNotificationTap(userInfo: userInfo)
+        }
         completionHandler()
     }
 }

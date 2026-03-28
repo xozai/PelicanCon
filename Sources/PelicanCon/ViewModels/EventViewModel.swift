@@ -22,9 +22,15 @@ final class EventViewModel: ObservableObject {
 
     func startListening() {
         streamTask = Task {
+            var didScheduleReminders = false
             for await events in eventService.eventsStream() {
-                self.events         = events
-                self.groupedEvents  = Self.group(events)
+                self.events        = events
+                self.groupedEvents = Self.group(events)
+                // Schedule local reminders once per session when we first get events
+                if !didScheduleReminders && !events.isEmpty {
+                    didScheduleReminders = true
+                    NotificationService.shared.scheduleEventReminders(for: events)
+                }
             }
         }
     }

@@ -4,9 +4,15 @@ import PhotosUI
 struct DirectMessageView: View {
     let conversation: Conversation
     @EnvironmentObject var chatVM: ChatViewModel
+    @EnvironmentObject var directoryVM: DirectoryViewModel
     @State private var messageText        = ""
     @State private var replyingTo: Message?
     @State private var selectedPhotoItem: PhotosPickerItem?
+
+    private var otherUserId: String? {
+        guard let uid = chatVM.currentUserId else { return nil }
+        return conversation.participantIds.first(where: { $0 != uid })
+    }
 
     private var otherName: String {
         guard let uid = chatVM.currentUserId else { return conversation.displayName }
@@ -14,21 +20,49 @@ struct DirectMessageView: View {
         return idx.map { conversation.participantNames[$0] } ?? conversation.displayName
     }
 
+    private var otherUser: AppUser? {
+        guard let otherId = otherUserId else { return nil }
+        return directoryVM.allUsers.first(where: { $0.id == otherId })
+    }
+
+    private var isOtherOnline: Bool {
+        guard let lastSeen = otherUser?.lastSeen else { return false }
+        return Date().timeIntervalSince(lastSeen) < 300   // online within 5 min
+    }
+
     var body: some View {
         ZStack {
             Theme.cream.ignoresSafeArea()
 
             VStack(spacing: 0) {
+                // Online presence header bar
+                if isOtherOnline {
+                    HStack(spacing: 6) {
+                        Circle().fill(Color.green).frame(width: 8, height: 8)
+                        Text("\(otherName) is active now")
+                            .font(.caption).foregroundColor(Theme.midGray)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 6)
+                    .background(Color.white)
+                    Divider()
+                }
+
                 // Messages
                 ScrollViewReader { proxy in
                     ScrollView {
                         LazyVStack(spacing: 12) {
                             ForEach(chatVM.directMessages) { message in
+                                let isOwn = message.senderId == chatVM.currentUserId
+                                let readCount = isOwn ? max(0, message.readBy.count - 1) : 0
                                 MessageBubbleView(
-                                    message: message,
-                                    isFromCurrentUser: message.senderId == chatVM.currentUserId
+                                    message:           message,
+                                    isFromCurrentUser: isOwn,
+                                    readByCount:       readCount
                                 ) { emoji in
                                     Task { await chatVM.toggleReaction(emoji: emoji, message: message, inGroup: false) }
+                                } onSwipeReply: {
+                                    withAnimation(.easeInOut(duration: 0.2)) { replyingTo = message }
                                 }
                                 .id(message.id)
                             }
@@ -49,23 +83,7 @@ struct DirectMessageView: View {
 
                 // Reply preview
                 if let reply = replyingTo {
-                    HStack {
-                        Rectangle().fill(Theme.gold).frame(width: 3)
-                        VStack(alignment: .leading) {
-                            Text("Replying to \(reply.senderName)")
-                                .font(.caption).fontWeight(.semibold)
-                                .foregroundColor(Theme.navy)
-                            Text(reply.text ?? "📷 Photo")
-                                .font(.caption).foregroundColor(Theme.midGray)
-                                .lineLimit(1)
-                        }
-                        Spacer()
-                        Button { replyingTo = nil } label: {
-                            Image(systemName: "xmark.circle.fill").foregroundColor(Theme.midGray)
-                        }
-                    }
-                    .padding(.horizontal, 16).padding(.vertical, 8)
-                    .background(Theme.lightGray)
+                    replyBanner(reply)
                 }
 
                 // Input
@@ -95,12 +113,39 @@ struct DirectMessageView: View {
         }
     }
 
+    // MARK: - Subviews
+
+    private func replyBanner(_ reply: Message) -> some View {
+        HStack {
+            Rectangle().fill(Theme.gold).frame(width: 3)
+            VStack(alignment: .leading) {
+                Text("Replying to \(reply.senderName)")
+                    .font(.caption).fontWeight(.semibold).foregroundColor(Theme.navy)
+                Text(reply.text ?? "📷 Photo")
+                    .font(.caption).foregroundColor(Theme.midGray).lineLimit(1)
+            }
+            Spacer()
+            Button {
+                withAnimation(.easeInOut(duration: 0.2)) { replyingTo = nil }
+            } label: {
+                Image(systemName: "xmark.circle.fill").foregroundColor(Theme.midGray)
+            }
+            .frame(minWidth: 44, minHeight: 44)
+            .accessibilityLabel("Cancel reply")
+        }
+        .padding(.horizontal, 16).padding(.vertical, 8)
+        .background(Theme.lightGray)
+        .transition(.move(edge: .bottom).combined(with: .opacity))
+    }
+
     private var inputBar: some View {
         HStack(spacing: 10) {
             PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
                 Image(systemName: "photo.on.rectangle")
                     .font(.title3).foregroundColor(Theme.softBlue)
             }
+            .frame(minWidth: 44, minHeight: 44)
+            .accessibilityLabel("Share a photo")
 
             TextField("Message \(otherName)…", text: $messageText, axis: .vertical)
                 .padding(.horizontal, 12).padding(.vertical, 9)
@@ -121,7 +166,9 @@ struct DirectMessageView: View {
                     .font(.title3)
                     .foregroundColor(messageText.isEmpty ? Theme.midGray : Theme.navy)
             }
+            .frame(minWidth: 44, minHeight: 44)
             .disabled(messageText.isEmpty || chatVM.isSending)
+            .accessibilityLabel("Send message")
         }
         .padding(.horizontal, 14).padding(.vertical, 10)
         .background(Color.white)

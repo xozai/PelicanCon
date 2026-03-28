@@ -17,6 +17,10 @@ struct AppUser: Identifiable, Codable, Equatable {
     var isAdmin: Bool = false
     var createdAt: Date
     var lastSeen: Date
+    // Badges & check-in (Feature 12)
+    var earnedBadges: [String] = []        // BadgeType raw values
+    var checkedIn: Bool = false
+    var messagesSentCount: Int = 0
 
     // Convenience
     var fullDisplayName: String {
@@ -38,6 +42,11 @@ struct AppUser: Identifiable, Codable, Equatable {
         case profilePhotoURL, bio, currentCity, graduationYear
         case socialLinks, notificationPreferences, fcmToken
         case isAdmin, createdAt, lastSeen
+        case earnedBadges, checkedIn, messagesSentCount
+    }
+
+    var earnedBadgeTypes: [BadgeType] {
+        earnedBadges.compactMap { BadgeType(rawValue: $0) }
     }
 }
 

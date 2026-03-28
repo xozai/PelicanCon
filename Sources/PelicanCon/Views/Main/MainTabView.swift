@@ -29,6 +29,7 @@ struct MainTabView: View {
                     .badge(chatVM.totalUnreadDMs())
                     .tag(1)
                     .environmentObject(chatVM)
+                    .environmentObject(directoryVM)
 
                 GalleryView()
                     .tabItem { Label("Photos", systemImage: "photo.stack.fill") }

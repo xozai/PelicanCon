@@ -51,6 +51,8 @@ final class ChatViewModel: ObservableObject {
                 text:           text,
                 replyTo:        replyTo
             )
+            await BadgeService.shared.incrementMessageCount(userId: uid)
+            await BadgeService.shared.checkAndAwardBadges(userId: uid)
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -136,6 +138,8 @@ final class ChatViewModel: ObservableObject {
                 text:           text,
                 replyTo:        replyTo
             )
+            await BadgeService.shared.incrementMessageCount(userId: uid)
+            await BadgeService.shared.checkAndAwardBadges(userId: uid)
         } catch {
             errorMessage = error.localizedDescription
         }

@@ -65,6 +65,7 @@ final class GalleryViewModel: ObservableObject {
                 thenImage:        thenImage,
                 taggedUserIds:    taggedUserIds
             )
+            await BadgeService.shared.checkAndAwardBadges(userId: uid)
         } catch {
             errorMessage = error.localizedDescription
         }

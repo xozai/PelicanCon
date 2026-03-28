@@ -58,6 +58,11 @@ final class UserService {
         }
     }
 
+    func fetchDisplayName(userId: String) async -> String? {
+        guard let user = try? await fetchUser(id: userId) else { return nil }
+        return user.displayName
+    }
+
     // MARK: - Profile photo upload
 
     func uploadProfilePhoto(userId: String, image: UIImage) async throws -> String {

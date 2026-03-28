@@ -7,6 +7,7 @@ struct ProfileView: View {
     @State private var showEditProfile   = false
     @State private var showSettings      = false
     @State private var showAdminDashboard = false
+    @State private var showCheckIn       = false
     @State private var selectedPhotoItem: PhotosPickerItem?
 
     private var user: AppUser? { authVM.currentUser }
@@ -86,6 +87,33 @@ struct ProfileView: View {
                                     ) { showSettings = true }
                                 }
 
+                                // Check-In & Badges button
+                                Button {
+                                    showCheckIn = true
+                                } label: {
+                                    HStack(spacing: 10) {
+                                        Image(systemName: "qrcode")
+                                            .font(.system(size: 18))
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text("Check-In & Badges")
+                                                .font(.subheadline).fontWeight(.semibold)
+                                            if !user.earnedBadges.isEmpty {
+                                                Text("\(user.earnedBadges.count) badge\(user.earnedBadges.count == 1 ? "" : "s") earned")
+                                                    .font(.caption).foregroundColor(Theme.midGray)
+                                            }
+                                        }
+                                        Spacer()
+                                        Image(systemName: "chevron.right")
+                                            .font(.caption).foregroundColor(Theme.midGray)
+                                    }
+                                    .foregroundColor(Theme.navy)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.horizontal, 16).padding(.vertical, 12)
+                                    .background(Color.white)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                }
+                                .accessibilityLabel("Check-In and Badges")
+
                                 // Admin Dashboard — only visible to admins
                                 if user.isAdmin {
                                     Button {
@@ -150,6 +178,11 @@ struct ProfileView: View {
             .sheet(isPresented: $showAdminDashboard) {
                 AdminDashboardView()
                     .environmentObject(authVM)
+            }
+            .sheet(isPresented: $showCheckIn) {
+                if let user {
+                    CheckInView(user: user)
+                }
             }
         }
     }

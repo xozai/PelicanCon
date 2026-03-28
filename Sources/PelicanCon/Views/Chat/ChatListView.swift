@@ -3,6 +3,7 @@ import SwiftUI
 struct ChatListView: View {
     @EnvironmentObject var chatVM: ChatViewModel
     @EnvironmentObject var authVM: AuthViewModel
+    @EnvironmentObject var directoryVM: DirectoryViewModel
     @State private var showGroupChat = false
 
     var body: some View {
@@ -33,6 +34,7 @@ struct ChatListView: View {
                                 NavigationLink {
                                     DirectMessageView(conversation: conversation)
                                         .environmentObject(chatVM)
+                                        .environmentObject(directoryVM)
                                 } label: {
                                     dmRow(conversation)
                                 }
@@ -94,12 +96,34 @@ struct ChatListView: View {
         .padding(.vertical, 6)
     }
 
+    private func isOnline(_ conversation: Conversation) -> Bool {
+        guard let uid = chatVM.currentUserId,
+              let otherId = conversation.participantIds.first(where: { $0 != uid }),
+              let user = directoryVM.allUsers.first(where: { $0.id == otherId }) else { return false }
+        return Date().timeIntervalSince(user.lastSeen) < 300
+    }
+
+    private func otherPhotoURL(_ conversation: Conversation) -> String? {
+        guard let uid = chatVM.currentUserId,
+              let otherId = conversation.participantIds.first(where: { $0 != uid }) else { return nil }
+        return directoryVM.allUsers.first(where: { $0.id == otherId })?.profilePhotoURL
+    }
+
     private func dmRow(_ conversation: Conversation) -> some View {
         let otherName = otherParticipantName(conversation)
         let unread    = unreadCount(conversation)
+        let online    = isOnline(conversation)
 
         return HStack(spacing: 14) {
-            AvatarView(photoURL: nil, name: otherName, size: 50)
+            ZStack(alignment: .bottomTrailing) {
+                AvatarView(photoURL: otherPhotoURL(conversation), name: otherName, size: 50)
+                if online {
+                    Circle()
+                        .fill(Color.green)
+                        .frame(width: 12, height: 12)
+                        .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                }
+            }
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(otherName)

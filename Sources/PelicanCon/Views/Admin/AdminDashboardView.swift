@@ -79,6 +79,14 @@ struct AdminDashboardView: View {
                             )
 
                             adminNavCard(
+                                icon:     "qrcode.viewfinder",
+                                iconColor: Theme.success,
+                                title:    "Check-In Scanner",
+                                subtitle: "Scan attendee QR codes at the door",
+                                destination: AnyView(QRScannerView())
+                            )
+
+                            adminNavCard(
                                 icon:     "chart.bar.fill",
                                 iconColor: Theme.navy,
                                 title:    "RSVP Summary",
