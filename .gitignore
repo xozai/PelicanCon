@@ -1,0 +1,39 @@
+# ── Xcode ────────────────────────────────────────────────────────────────────
+.DS_Store
+*.xcuserstate
+xcuserdata/
+DerivedData/
+*.xcworkspace/xcuserdata/
+*.xccheckout
+*.moved-aside
+*.pbxuser
+
+# ── Swift Package Manager ─────────────────────────────────────────────────────
+.build/
+.swiftpm/
+Packages/
+
+# ── Firebase secrets — NEVER commit these ────────────────────────────────────
+# Download GoogleService-Info.plist from Firebase Console and place it at
+# Sources/PelicanCon/Resources/GoogleService-Info.plist — it stays local only.
+GoogleService-Info.plist
+
+# APNs private key (.p8) downloaded from Apple Developer Portal
+*.p8
+
+# Distribution certificate private key
+*.p12
+
+# Firebase Admin service-account key (if ever used locally for scripts)
+serviceAccountKey.json
+*-firebase-adminsdk-*.json
+
+# ── Cloud Functions ───────────────────────────────────────────────────────────
+functions/node_modules/
+functions/.runtimeconfig.json
+
+# ── Misc ──────────────────────────────────────────────────────────────────────
+*.log
+*.local
+.env
+.env.local

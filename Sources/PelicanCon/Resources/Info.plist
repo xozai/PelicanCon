@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- App identity -->
+    <key>CFBundleName</key>
+    <string>PelicanCon</string>
+    <key>CFBundleDisplayName</key>
+    <string>PelicanCon</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.pelicancon.app</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0.0</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>LSRequiresIPhoneOS</key>
+    <true/>
+    <key>UIRequiredDeviceCapabilities</key>
+    <array>
+        <string>armv7</string>
+    </array>
+
+    <!-- Supported interface orientations -->
+    <key>UISupportedInterfaceOrientations</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+
+    <!-- Privacy usage descriptions -->
+    <key>NSCameraUsageDescription</key>
+    <string>PelicanCon uses your camera so you can take profile photos and share reunion pictures with classmates.</string>
+
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>PelicanCon accesses your photo library so you can share reunion and throwback photos with classmates.</string>
+
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>PelicanCon saves shared reunion photos to your photo library.</string>
+
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>PelicanCon uses your location to show directions to reunion event venues.</string>
+
+    <key>NSCalendarsUsageDescription</key>
+    <string>PelicanCon adds reunion events to your calendar so you never miss a moment.</string>
+
+    <key>NSCalendarsWriteOnlyAccessUsageDescription</key>
+    <string>PelicanCon adds reunion events to your calendar so you never miss a moment.</string>
+
+    <key>NSUserNotificationsUsageDescription</key>
+    <string>PelicanCon sends reminders for upcoming events and notifies you of new messages and photos from classmates.</string>
+
+    <!-- URL schemes (Google Sign-In)
+         SETUP REQUIRED: Replace the REVERSED_CLIENT_ID value below with the actual
+         value from your GoogleService-Info.plist (field REVERSED_CLIENT_ID).
+         Example: com.googleusercontent.apps.123456789-abc123def456
+         Failing to do this will crash Google Sign-In at runtime. -->
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLName</key>
+            <string>com.pelicancon.google-signin</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>$(GOOGLE_REVERSED_CLIENT_ID)</string>
+            </array>
+        </dict>
+        <dict>
+            <key>CFBundleURLName</key>
+            <string>com.pelicancon.app</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>com.pelicancon.app</string>
+            </array>
+        </dict>
+    </array>
+
+    <!-- Queried URL Schemes -->
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+        <string>maps</string>
+        <string>comgooglemaps</string>
+    </array>
+
+    <!-- App icon (set) -->
+    <key>CFBundleIcons</key>
+    <dict>
+        <key>CFBundlePrimaryIcon</key>
+        <dict>
+            <key>CFBundleIconFiles</key>
+            <array>
+                <string>AppIcon</string>
+            </array>
+            <key>UIPrerenderedIcon</key>
+            <false/>
+        </dict>
+    </dict>
+
+    <!-- Launch screen -->
+    <key>UILaunchScreen</key>
+    <dict>
+        <key>UIColorName</key>
+        <string>LaunchBackground</string>
+        <key>UIImageName</key>
+        <string>LaunchLogo</string>
+    </dict>
+
+    <!-- Main scene config -->
+    <key>UIApplicationSceneManifest</key>
+    <dict>
+        <key>UIApplicationSupportsMultipleScenes</key>
+        <false/>
+        <key>UISceneConfigurations</key>
+        <dict/>
+    </dict>
+
+    <!-- Background modes for push notifications -->
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>remote-notification</string>
+    </array>
+
+    <!-- Required for Firebase Crashlytics -->
+    <key>FirebaseCrashlyticsCollectionEnabled</key>
+    <true/>
+</dict>
+</plist>
