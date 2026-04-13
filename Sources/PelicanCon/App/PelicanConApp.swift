@@ -2,6 +2,7 @@ import SwiftUI
 import Firebase
 import FirebaseFirestore
 import FirebaseCrashlytics
+import GoogleSignIn
 
 @main
 struct PelicanConApp: App {
