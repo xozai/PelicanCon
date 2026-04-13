@@ -35,6 +35,11 @@ let package = Package(
             resources: [
                 .process("Resources")
             ]
+        ),
+        .testTarget(
+            name: "PelicanConTests",
+            dependencies: ["PelicanCon"],
+            path: "Tests/PelicanConTests"
         )
     ]
 )
