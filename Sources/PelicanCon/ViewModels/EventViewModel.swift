@@ -12,7 +12,7 @@ final class EventViewModel: ObservableObject {
 
     private let eventService = EventService.shared
     private var streamTask: Task<Void, Never>?
-    private var userId: String?
+    var userId: String?
 
     init(userId: String? = nil) {
         self.userId = userId
